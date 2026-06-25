@@ -163,9 +163,13 @@ class _WeatherCardState extends State<WeatherCard> {
     if (code == 45 || code == 48) {
       return const _WeatherInfo(Icons.foggy, Color(0xFF9AA5B1), 'Névoa');
     }
-    if (code >= 51 && code <= 67) {
+    if (code >= 51 && code <= 57) {
       return const _WeatherInfo(
           Icons.grain_rounded, Color(0xFF4DA3FF), 'Garoa');
+    }
+    if (code >= 61 && code <= 67) {
+      return const _WeatherInfo(
+          Icons.umbrella_rounded, Color(0xFF4DA3FF), 'Chuva');
     }
     if (code >= 71 && code <= 77) {
       return const _WeatherInfo(
@@ -174,6 +178,10 @@ class _WeatherCardState extends State<WeatherCard> {
     if (code >= 80 && code <= 82) {
       return const _WeatherInfo(
           Icons.umbrella_rounded, Color(0xFF4DA3FF), 'Pancadas de chuva');
+    }
+    if (code >= 85 && code <= 86) {
+      return const _WeatherInfo(
+          Icons.ac_unit_rounded, Color(0xFF8FD3FF), 'Neve');
     }
     if (code >= 95) {
       return const _WeatherInfo(

@@ -3,10 +3,19 @@ import 'package:geolocator/geolocator.dart';
 /// Thin wrapper around `geolocator` that handles permissions and exposes a
 /// continuous position stream used by the speedometer and weather widgets.
 class LocationService {
+  Future<bool>? _pendingPermission;
+
   /// Ensures location services are enabled and permission is granted.
   ///
-  /// Returns `true` when the app can read the device position.
-  Future<bool> ensurePermission() async {
+  /// Returns `true` when the app can read the device position. Concurrent
+  /// callers (e.g. the speedometer and weather widgets starting together)
+  /// share a single in-flight request so the OS dialog is only shown once.
+  Future<bool> ensurePermission() {
+    return _pendingPermission ??= _requestPermission()
+      ..whenComplete(() => _pendingPermission = null);
+  }
+
+  Future<bool> _requestPermission() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return false;
