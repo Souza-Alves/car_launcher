@@ -2,6 +2,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Microphone for CarPlay Siri / phone calls. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <!-- USB host: required to talk to the CarlinKit CarPlay dongle. -->
     <uses-feature android:name="android.hardware.usb.host" android:required="false"/>
 

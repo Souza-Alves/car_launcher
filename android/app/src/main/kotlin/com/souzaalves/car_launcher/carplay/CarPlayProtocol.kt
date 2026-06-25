@@ -57,6 +57,68 @@ object CarPlayProtocol {
     const val TOUCH_MOVE = 15
     const val TOUCH_UP = 16
 
+    // Audio commands carried inside an AudioData message (1-byte trailer).
+    const val AUDIO_OUTPUT_START = 1
+    const val AUDIO_OUTPUT_STOP = 2
+    const val AUDIO_INPUT_CONFIG = 3
+    const val AUDIO_PHONECALL_START = 4
+    const val AUDIO_PHONECALL_STOP = 5
+    const val AUDIO_NAVI_START = 6
+    const val AUDIO_SIRI_START = 7
+    const val AUDIO_SIRI_STOP = 8
+    const val AUDIO_MEDIA_START = 10
+    const val AUDIO_MEDIA_STOP = 11
+
+    /** PCM format for the mic stream sent back to the phone (16 kHz mono 16-bit). */
+    const val AUDIO_DECODE_MIC = 5
+
+    /** Maps a CarlinKit decodeType to (sampleRate, channels, bytesPerSample). */
+    fun audioFormat(decodeType: Int): Triple<Int, Int, Int> = when (decodeType) {
+        1, 2 -> Triple(44100, 2, 2)
+        3 -> Triple(8000, 1, 2)
+        4 -> Triple(48000, 2, 2)
+        5 -> Triple(16000, 1, 2)
+        6 -> Triple(24000, 1, 2)
+        7 -> Triple(16000, 2, 2)
+        else -> Triple(44100, 2, 2)
+    }
+
+    /** Parsed AudioData message: either an [command], a volume hint, or [pcm]. */
+    data class AudioPacket(
+        val decodeType: Int,
+        val volume: Float,
+        val audioType: Int,
+        val command: Int?,
+        val pcm: ByteArray?,
+    )
+
+    fun parseAudio(payload: ByteArray): AudioPacket? {
+        if (payload.size < 12) return null
+        val buf = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
+        val decodeType = buf.int
+        val volume = buf.float
+        val audioType = buf.int
+        return when (payload.size) {
+            12 -> AudioPacket(decodeType, volume, audioType, null, null)
+            13 -> AudioPacket(decodeType, volume, audioType, payload[12].toInt(), null)
+            16 -> AudioPacket(decodeType, volume, audioType, null, null) // volume duration
+            else -> AudioPacket(
+                decodeType, volume, audioType, null,
+                payload.copyOfRange(12, payload.size),
+            )
+        }
+    }
+
+    /** Builds an outgoing AudioData message carrying mic PCM. */
+    fun micAudio(pcm: ByteArray, length: Int): ByteArray {
+        val p = le(12 + length)
+        p.putInt(AUDIO_DECODE_MIC)
+        p.putFloat(0f)
+        p.putInt(1)
+        p.put(pcm, 0, length)
+        return frame(TYPE_AUDIO_DATA, p.array())
+    }
+
     // CarlinKit config "files" written during the handshake.
     const val FILE_DPI = "/tmp/screen_dpi"
     const val FILE_NIGHT_MODE = "/tmp/night_mode"

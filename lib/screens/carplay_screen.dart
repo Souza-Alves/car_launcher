@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../services/carplay_controller.dart';
 import '../theme/app_theme.dart';
@@ -41,6 +42,8 @@ class _CarPlayScreenState extends State<CarPlayScreen> {
     final media = MediaQuery.of(context);
     final dpr = media.devicePixelRatio;
     final size = media.size;
+    // Mic is needed for Siri / phone calls; best-effort, harmless if denied.
+    Permission.microphone.request();
     _controller.start(
       width: (size.width * dpr).round(),
       height: (size.height * dpr).round(),

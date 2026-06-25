@@ -41,6 +41,10 @@ class CarPlayController(
     private var eventSink: EventChannel.EventSink? = null
     private var transport: CarlinkitTransport? = null
     private var decoder: CarPlayDecoder? = null
+    private val audioPlayer = CarPlayAudioPlayer()
+    private val micRecorder = CarPlayMicRecorder(context) { pcm, length ->
+        transport?.write(CarPlayProtocol.micAudio(pcm, length))
+    }
     private var heartbeat: Timer? = null
 
     private var surface: Surface? = null
@@ -123,6 +127,8 @@ class CarPlayController(
     private fun stop() {
         heartbeat?.cancel()
         heartbeat = null
+        micRecorder.stop()
+        audioPlayer.stop()
         transport?.stop()
         transport = null
         decoder?.stop()
@@ -173,8 +179,25 @@ class CarPlayController(
             CarPlayProtocol.TYPE_VIDEO_DATA -> {
                 CarPlayProtocol.videoPayloadToH264(payload)?.let { decoder?.decode(it) }
             }
+            CarPlayProtocol.TYPE_AUDIO_DATA -> handleAudio(payload)
             CarPlayProtocol.TYPE_PLUGGED -> emit("phoneConnected")
-            CarPlayProtocol.TYPE_UNPLUGGED -> emit("phoneDisconnected")
+            CarPlayProtocol.TYPE_UNPLUGGED -> {
+                micRecorder.stop()
+                audioPlayer.stop()
+                emit("phoneDisconnected")
+            }
+        }
+    }
+
+    private fun handleAudio(payload: ByteArray) {
+        val packet = CarPlayProtocol.parseAudio(payload) ?: return
+        when (packet.command) {
+            CarPlayProtocol.AUDIO_SIRI_START,
+            CarPlayProtocol.AUDIO_PHONECALL_START -> micRecorder.start()
+            CarPlayProtocol.AUDIO_SIRI_STOP,
+            CarPlayProtocol.AUDIO_PHONECALL_STOP -> micRecorder.stop()
+            null -> packet.pcm?.let { audioPlayer.play(packet.decodeType, it) }
+            else -> Unit
         }
     }
 
