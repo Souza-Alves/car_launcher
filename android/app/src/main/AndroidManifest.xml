@@ -49,6 +49,19 @@
         <intent>
             <action android:name="android.intent.action.MAIN"/>
         </intent>
+        <!-- Apps launched directly by package name from the home grid. -->
+        <package android:name="com.android.dialer"/>
+        <package android:name="com.google.android.apps.maps"/>
+        <package android:name="com.spotify.music"/>
+        <package android:name="com.waze"/>
+        <package android:name="com.google.android.youtube"/>
+        <package android:name="com.google.android.projection.gearhead"/>
+        <package android:name="com.zjinnova.zlink"/>
+        <package android:name="com.carlinkit.zlink"/>
+        <package android:name="cn.manstep.phonemirrorBox"/>
+        <package android:name="com.carlinkit.airplay"/>
+        <package android:name="com.android.camera2"/>
+        <package android:name="com.android.settings"/>
         <intent>
             <action android:name="android.intent.action.VIEW"/>
         </intent>
