@@ -118,13 +118,19 @@ class _HomeScreenState extends State<HomeScreen> {
         fallbackUrl:
             'https://play.google.com/store/apps/details?id=com.google.android.projection.gearhead',
       ),
+      // CarPlay via the ZLink / CarlinKit companion app. The package id varies
+      // by head-unit firmware, so try the common ones in order.
       HomeTile(
         label: 'CarPlay',
         icon: Icons.directions_car_filled_rounded,
         gradient: const [Color(0xFF8E9EAB), Color(0xFF5B6770)],
-        androidPackage: 'com.carlinkit.airplay',
-        fallbackUrl:
-            'https://play.google.com/store/search?q=carplay&c=apps',
+        androidPackages: const [
+          'com.zjinnova.zlink',
+          'com.carlinkit.zlink',
+          'cn.manstep.phonemirrorBox',
+          'com.carlinkit.airplay',
+        ],
+        fallbackUrl: 'https://play.google.com/store/search?q=zlink&c=apps',
       ),
       HomeTile(
         label: 'Câmera',

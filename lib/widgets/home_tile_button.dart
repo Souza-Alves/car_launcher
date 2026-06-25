@@ -18,12 +18,16 @@ class HomeTileButton extends StatelessWidget {
       return;
     }
 
-    final package = tile.androidPackage;
-    if (package == null || package.isEmpty) return;
+    final packages = tile.candidatePackages;
+    if (packages.isEmpty) return;
 
-    final opened =
-        await LaunchApp.openApp(androidPackageName: package, openStore: false);
-    if (opened > 0) return;
+    for (final package in packages) {
+      final opened = await LaunchApp.openApp(
+        androidPackageName: package,
+        openStore: false,
+      );
+      if (opened > 0) return;
+    }
 
     final fallback = tile.fallbackUrl;
     if (fallback != null && fallback.isNotEmpty) {
